@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>サッシ工場日報アプリ v6.0</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; user-select: none; }
+        body { background-color: #f4f6f9; color: #333; padding-bottom: 30px; }
+        .header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; }
+        
+        .tabs { display: flex; background: #fff; border-bottom: 1px solid #ddd; }
+        .tab { flex: 1; text-align: center; padding: 15px 0; font-size: 1rem; color: #7f8c8d; font-weight: bold; cursor: pointer; }
+        .tab.active { color: #3498db; border-bottom: 3px solid #3498db; background: #fafafa; }
+        .tab-content { display: none; padding: 15px; }
+        .tab-content.active { display: block; }
+
+        .btn-quick { background: #2ecc71; color: white; width: 100%; padding: 18px; border-radius: 12px; text-align: center; font-size: 1.3rem; font-weight: bold; border: none; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-quick:active { background: #27ae60; }
+        
+        .section-title { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 8px; font-weight: bold; margin-top: 10px; }
+        .grid-process { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .btn-proc { background: white; border: 2px solid #bdc3c7; padding: 15px 5px; text-align: center; border-radius: 10px; font-size: 1rem; font-weight: bold; color: #34495e; }
+        .btn-proc.active { background: #3498db; color: white; border-color: #2980b9; }
+
+        .num-display { background: white; border: 2px solid #bdc3c7; border-radius: 10px; padding: 12px; font-size: 1.8rem; text-align: right; font-weight: bold; margin-bottom: 15px; min-height: 58px; color: #2c3e50; }
+        .keypad-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .grid-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 3; }
+        .btn-key { background: white; border: 1px solid #ccc; padding: 15px 5px; text-align: center; border-radius: 8px; font-size: 1.3rem; font-weight: bold; box-shadow: 0 2px 2px rgba(0,0,0,0.05); }
+        .btn-key:active { background: #eee; }
+        
+        .side-action-container { display: flex; flex-direction: column; gap: 8px; flex: 1.2; }
+        .btn-bs { background: #f5b041; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; flex: 1; box-shadow: 0 2px 2px rgba(0,0,0,0.05); }
+        .btn-bs:active { background: #dc9218; }
+        .btn-direct-send { background: #34495e; color: white; border: none; border-radius: 8px; font-size: 1.3rem; font-weight: bold; flex: 3; box-shadow: 0 4px 4px rgba(0,0,0,0.15); }
+        .btn-direct-send:active { background: #2c3e50; }
+
+        .input-memo { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #bdc3c7; font-size: 1.1rem; margin-bottom: 15px; }
+
+        .grid-time { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; gap: 8px; margin-bottom: 10px; }
+        .btn-time-big { background: #95a5a6; color: white; border: none; height: 50px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; }
+        .time-center-stack { display: flex; flex-direction: column; gap: 4px; }
+        .btn-time-sub { background: #bdc3c7; color: #333; border: none; height: 23px; font-size: 0.8rem; font-weight: bold; border-radius: 4px; }
+        .time-display-box { background: #ebf5fb; border: 1px solid #aec6cf; border-radius: 8px; padding: 8px; text-align: center; font-size: 0.85rem; font-weight: bold; color: #2980b9; margin-bottom: 15px; }
+
+        .summary-card { background: #2980b9; color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .summary-num { font-size: 1.8rem; font-weight: bold; }
+
+        .timeline-item { background: white; border-radius: 8px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .tl-left { display: flex; flex-direction: column; gap: 4px; width: 75%; }
+        .tl-time { font-size: 0.85rem; color: #7f8c8d; font-weight: bold; }
+        .tl-title { font-size: 1rem; font-weight: bold; color: #2c3e50; }
+        .tl-site { font-size: 0.9rem; color: #e67e22; font-weight: bold; }
+        .tl-qty-click { font-size: 1.5rem; font-weight: bold; color: #3498db; border-bottom: 2px dashed #3498db; cursor: pointer; }
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; }
+
+        .btn-copy { background: #3498db; color: white; width: 100%; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.1rem; font-weight: bold; border: none; margin-bottom: 15px; }
+        .btn-clear { background: #95a5a6; color: white; width: 100%; padding: 10px; border-radius: 8px; text-align: center; font-size: 0.9rem; border: none; margin-top: 30px; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 25px; border-radius: 25px; font-size: 0.95rem; font-weight: bold; display: none; z-index: 10000; text-align: center; }
+        .flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.4); display: none; z-index: 9999; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">サッシ工場日報アプリ v6.0</div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('inputTab', this)">入力</div>
+        <div class="tab" onclick="switchTab('historyTab', this)">今日の記録</div>
+    </div>
+
+    <div id="flash" class="flash-overlay"></div>
+    <div id="toast" class="toast"></div>
+
+    <div id="inputTab" class="tab-content active">
+        <button class="btn-quick" onclick="sendQuick()">⚡ クイック完了 (Z)</button>
+
+        <div class="section-title">工程を選択</div>
+        <div class="grid-process">
+            <button class="btn-proc" id="p-A" onclick="selectProcess('A', '切断')">切断(A)</button>
+            <button class="btn-proc" id="p-B" onclick="selectProcess('B', '手加工')">手加工(B)</button>
+            <button class="btn-proc" id="p-C" onclick="selectProcess('C', 'NC加工')">NC加工(C)</button>
+            <button class="btn-proc" id="p-D" onclick="selectProcess('D', '組立')">組立(D)</button>
+            <button class="btn-proc" id="p-Z" onclick="selectProcess('Z', 'その他')">その他(Z)</button>
+        </div>
+
+        <div class="section-title">現場名・備考（空欄でもOK / 声で入力も可能）</div>
+        <input type="text" class="input-memo" id="memoInput" placeholder="例: すき家、せき内科など">
+
+        <div class="section-title">数量を入力</div>
+        <div class="num-display" id="numDisplay"></div>
+        
+        <div class="keypad-container">
+            <div class="grid-keypad">
+                <button class="btn-key" onclick="pressKey('1')">1</button>
+                <button class="btn-key" onclick="pressKey('2')">2</button>
+                <button class="btn-key" onclick="pressKey('3')">3</button>
+                <button class="btn-key" onclick="pressKey('4')">4</button>
+                <button class="btn-key" onclick="pressKey('5')">5</button>
+                <button class="btn-key" onclick="pressKey('6')">6</button>
+                <button class="btn-key" onclick="pressKey('7')">7</button>
+                <button class="btn-key" onclick="pressKey('8')">8</button>
+                <button class="btn-key" onclick="pressKey('9')">9</button>
+                <button class="btn-key" onclick="pressKey('C')" style="background:#e74c3c; color:white;">C</button>
+                <button class="btn-key" onclick="pressKey('0')">0</button>
+            </div>
+            <div class="side-action-container">
+                <button class="btn-bs" onclick="pressKey('BS')">⌫ 戻る</button>
+                <button class="btn-direct-send" onclick="submitData()">送信<br>確定</button>
+            </div>
+        </div>
+
+        <div class="section-title">時間調整 (必要な場合のみ)</div>
+        <div class="grid-time">
+            <button class="btn-time-big" onclick="adjustTime(-60)">－1h</button>
+            <div class="time-center-stack">
+                <button class="btn-time-sub" onclick="adjustTime(-10)">－10分</button>
+                <button class="btn-time-sub" onclick="adjustTime(10)">＋10分</button>
+            </div>
+            <button class="btn-time-big" onclick="adjustTime(60)">＋1h</button>
+        </div>
+        <div class="time-display-box" id="timeDisplay" onclick="resetTimeToPresent()">設定時刻: 表示中...</div>
+
+        <div class="section-title" style="margin-top:20px;">直近の履歴</div>
+        <div id="recentHistory"></div>
+    </div>
+
+    <div id="historyTab" class="tab-content">
+        <div class="summary-card">
+            <div>本日の製作 累計数量</div>
+            <div class="summary-num" id="totalQtyDisplay">0 個</div>
+        </div>
+        <button class="btn-copy" onclick="copyToClipboard()">📋 1発でドカンとExcel用にコピー</button>
+        <div id="fullTimeline"></div>
+        <button class="btn-clear" onclick="clearAllData()">⚠️ アプリ内のデータをリセット</button>
+    </div>
+
+    <script>
+        let selectedCode = ''; let selectedLabel = ''; let currentQty = ''; let timeOffsetMinutes = 0;
+        let records = JSON.parse(localStorage.getItem('nippo_records_v6') || '[]');
+
+        window.onload = function() {
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 10000);
+            checkAutoSet();
+            renderRecords();
+        };
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active'); el.classList.add('active');
+            renderRecords();
+        }
+
+        function getTargetDate() {
+            let d = new Date(); d.setMinutes(d.getMinutes() + timeOffsetMinutes); return d;
+        }
+
+        function updateTimeDisplay() {
+            let d = getTargetDate();
+            document.getElementById('timeDisplay').innerText = `設定時刻: ${d.toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'})} ⏳ (タップで今すぐリセット)`;
+        }
+
+        function adjustTime(mins) { timeOffsetMinutes += mins; updateTimeDisplay(); }
+        function resetTimeToPresent() { timeOffsetMinutes = 0; updateTimeDisplay(); showToast("現在時刻に戻しました"); }
+
+        function checkAutoSet() {
+            let now = new Date(); let hr = now.getHours(); let min = now.getMinutes(); let totalMin = hr * 60 + min;
+            if (totalMin >= 510 && totalMin <= 520) {
+                selectProcess('W', '朝礼'); currentQty = '0'; document.getElementById('numDisplay').innerText = currentQty; document.getElementById('memoInput').value = '朝礼';
+            } else if (hr == 12) {
+                selectProcess('Z', 'その他'); currentQty = '0'; document.getElementById('numDisplay').innerText = currentQty; document.getElementById('memoInput').value = '休憩';
+            }
+        }
+
+        function selectProcess(code, label) {
+            selectedCode = code; selectedLabel = label;
+            document.querySelectorAll('.btn-proc').forEach(b => b.classList.remove('active'));
+            let btn = document.getElementById(`p-${code}`); if(btn) btn.classList.add('active');
+            
+            // 自動セット時間外に普通にボタンが押されたら文字をクリアする
+            let hr = new Date().getHours();
+            if(hr != 12 && !(new Date().getHours() == 8 && new Date().getMinutes() <= 40)) {
+                if(code !== 'W' && code !== 'Z') { document.getElementById('memoInput').value = ''; }
+            }
+        }
+
+        function pressKey(key) {
+            if (key === 'C') { currentQty = ''; }
+            else if (key === 'BS') { currentQty = currentQty.slice(0, -1); }
+            else { if(currentQty === '0') currentQty = ''; currentQty += key; }
+            document.getElementById('numDisplay').innerText = currentQty;
+        }
+
+        function sendQuick() {
+            let d = getTargetDate();
+            let newRecord = { id: Date.now(), time: d.toLocaleString('ja-JP'), code: 'Z', label: 'その他', qty: 0, memo: 'クイック完了' };
+            records.unshift(newRecord); saveAndFeedback("クイック完了を保存");
+        }
+
+        function submitData() {
+            if(!selectedCode) { alert("工程を選択してください！"); return; }
+            let qtyNum = parseInt(currentQty) || 0;
+            let d = getTargetDate();
+
+            let newRecord = {
+                id: Date.now(),
+                time: d.toLocaleString('ja-JP'),
+                code: selectedCode,
+                label: selectedLabel,
+                qty: qtyNum,
+                memo: document.getElementById('memoInput').value || ''
+            };
+
+            records.unshift(newRecord);
+            saveAndFeedback(`スマホに保存しました [${qtyNum}個]`);
+            
+            currentQty = ''; document.getElementById('numDisplay').innerText = '';
+            document.getElementById('memoInput').value = '';
+            document.querySelectorAll('.btn-proc').forEach(b => b.classList.remove('active'));
+            selectedCode = ''; timeOffsetMinutes = 0; updateTimeDisplay();
+        }
+
+        function saveAndFeedback(msg) {
+            localStorage.setItem('nippo_records_v6', JSON.stringify(records));
+            renderRecords();
+            let flash = document.getElementById('flash'); flash.style.display = 'block'; setTimeout(() => flash.style.display = 'none', 150);
+            showToast(msg);
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('toast'); toast.innerText = msg; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000);
+        }
+
+        function editQty(id, oldQty) {
+            let newQty = prompt("修正後の数量を入力してください:", oldQty);
+            if(newQty !== null) {
+                let num = parseInt(newQty) || 0;
+                records = records.map(r => r.id === id ? {...r, qty: num} : r);
+                localStorage.setItem('nippo_records_v6', JSON.stringify(records));
+                renderRecords(); showToast("数量を修正しました");
+            }
+        }
+
+        function deleteRecord(id) {
+            if(confirm("削除しますか？")) {
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem('nippo_records_v6', JSON.stringify(records));
+                renderRecords(); showToast("削除しました");
+            }
+        }
+
+        function clearAllData() {
+            if(confirm("データをすべて消去しますか？\n(Excelに貼った後のリセット用)")) {
+                records = []; localStorage.setItem('nippo_records_v6', JSON.stringify(records));
+                renderRecords(); showToast("リセットしました");
+            }
+        }
+
+        function renderRecords() {
+            let totalQty = 0;
+            let recentDiv = document.getElementById('recentHistory'); recentDiv.innerHTML = '';
+            
+            records.slice(0, 3).forEach(r => {
+                let t = r.time.split(' ')[1] || r.time;
+                recentDiv.innerHTML += `
+                    <div class="timeline-item">
+                        <div class="tl-left">
+                            <span class="tl-time">${t}</span>
+                            <span class="tl-title">${r.label} (${r.code}) ${r.memo ? `<span class="tl-site">[${r.memo}]</span>` : ''}</span>
+                        </div>
+                        <div class="tl-right"><span class="tl-qty-click" onclick="editQty(${r.id}, ${r.qty})">${r.qty}個</span></div>
+                    </div>`;
+            });
+
+            let fullDiv = document.getElementById('fullTimeline'); fullDiv.innerHTML = '';
+            if(records.length === 0) {
+                fullDiv.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">記録はまだありません</p>';
+                document.getElementById('totalQtyDisplay').innerText = "0 個"; return;
+            }
+
+            records.forEach(r => {
+                if(['A','B','C','D'].includes(r.code)) { totalQty += r.qty; }
+                fullDiv.innerHTML += `
+                    <div class="timeline-item">
+                        <div class="tl-left">
+                            <span class="tl-time">${r.time}</span>
+                            <span class="tl-title">${r.label} (${r.code})</span><br><span class="tl-site">メモ: ${r.memo || 'なし'}</span>
+                        </div>
+                        <div class="tl-right">
+                            <span class="tl-qty-click" onclick="editQty(${r.id}, ${r.qty})">${r.qty}個</span>
+                            <button class="btn-del" onclick="deleteRecord(${r.id})">削除</button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('totalQtyDisplay').innerText = totalQty + " 個";
+        }
+
+        // 🌟コピペデータ作成：数量の右隣（5列目）に自動で「1」を潜り込ませる魔法の関数
+        function copyToClipboard() {
+            if(records.length === 0) { alert("コピーするデータがありません"); return; }
+            let text = "";
+            let copyList = [...records].reverse(); // 古い順に並び替え
+            
+            copyList.forEach(r => {
+                let dStr = r.time.split(' ')[0];
+                let tStr = r.time.split(' ')[1] ? r.time.split(' ')[1].slice(0,5) : "";
+                
+                // ➔ 【日時】タブ【自分】タブ【工程記号】タブ【数量】タブ【 1 】タブ【メモ】 の順で1行を作る
+                text += `${dStr} ${tStr}\t自分\t${r.code}\t${r.qty}\t1\t${r.memo}\n`;
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("📋 Excel用に1発コピーしました！シートの左上セルでCtrl+Vしてください");
+            }).catch(err => { alert("コピー失敗"); });
+        }
+    </script>
+</body>
+</html>
