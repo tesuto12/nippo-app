@@ -1,320 +1,254 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>サッシ工場日報アプリ v6.0</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; user-select: none; }
-        body { background-color: #f4f6f9; color: #333; padding-bottom: 30px; }
-        .header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; }
-        
-        .tabs { display: flex; background: #fff; border-bottom: 1px solid #ddd; }
-        .tab { flex: 1; text-align: center; padding: 15px 0; font-size: 1rem; color: #7f8c8d; font-weight: bold; cursor: pointer; }
-        .tab.active { color: #3498db; border-bottom: 3px solid #3498db; background: #fafafa; }
-        .tab-content { display: none; padding: 15px; }
-        .tab-content.active { display: block; }
-
-        .btn-quick { background: #2ecc71; color: white; width: 100%; padding: 18px; border-radius: 12px; text-align: center; font-size: 1.3rem; font-weight: bold; border: none; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-quick:active { background: #27ae60; }
-        
-        .section-title { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 8px; font-weight: bold; margin-top: 10px; }
-        .grid-process { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .btn-proc { background: white; border: 2px solid #bdc3c7; padding: 15px 5px; text-align: center; border-radius: 10px; font-size: 1rem; font-weight: bold; color: #34495e; }
-        .btn-proc.active { background: #3498db; color: white; border-color: #2980b9; }
-
-        .num-display { background: white; border: 2px solid #bdc3c7; border-radius: 10px; padding: 12px; font-size: 1.8rem; text-align: right; font-weight: bold; margin-bottom: 15px; min-height: 58px; color: #2c3e50; }
-        .keypad-container { display: flex; gap: 10px; margin-bottom: 15px; }
-        .grid-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 3; }
-        .btn-key { background: white; border: 1px solid #ccc; padding: 15px 5px; text-align: center; border-radius: 8px; font-size: 1.3rem; font-weight: bold; box-shadow: 0 2px 2px rgba(0,0,0,0.05); }
-        .btn-key:active { background: #eee; }
-        
-        .side-action-container { display: flex; flex-direction: column; gap: 8px; flex: 1.2; }
-        .btn-bs { background: #f5b041; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; flex: 1; box-shadow: 0 2px 2px rgba(0,0,0,0.05); }
-        .btn-bs:active { background: #dc9218; }
-        .btn-direct-send { background: #34495e; color: white; border: none; border-radius: 8px; font-size: 1.3rem; font-weight: bold; flex: 3; box-shadow: 0 4px 4px rgba(0,0,0,0.15); }
-        .btn-direct-send:active { background: #2c3e50; }
-
-        .input-memo { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #bdc3c7; font-size: 1.1rem; margin-bottom: 15px; }
-
-        .grid-time { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; gap: 8px; margin-bottom: 10px; }
-        .btn-time-big { background: #95a5a6; color: white; border: none; height: 50px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; }
-        .time-center-stack { display: flex; flex-direction: column; gap: 4px; }
-        .btn-time-sub { background: #bdc3c7; color: #333; border: none; height: 23px; font-size: 0.8rem; font-weight: bold; border-radius: 4px; }
-        .time-display-box { background: #ebf5fb; border: 1px solid #aec6cf; border-radius: 8px; padding: 8px; text-align: center; font-size: 0.85rem; font-weight: bold; color: #2980b9; margin-bottom: 15px; }
-
-        .summary-card { background: #2980b9; color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .summary-num { font-size: 1.8rem; font-weight: bold; }
-
-        .timeline-item { background: white; border-radius: 8px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .tl-left { display: flex; flex-direction: column; gap: 4px; width: 75%; }
-        .tl-time { font-size: 0.85rem; color: #7f8c8d; font-weight: bold; }
-        .tl-title { font-size: 1rem; font-weight: bold; color: #2c3e50; }
-        .tl-site { font-size: 0.9rem; color: #e67e22; font-weight: bold; }
-        .tl-qty-click { font-size: 1.5rem; font-weight: bold; color: #3498db; border-bottom: 2px dashed #3498db; cursor: pointer; }
-        .btn-del { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; }
-
-        .btn-copy { background: #3498db; color: white; width: 100%; padding: 15px; border-radius: 10px; text-align: center; font-size: 1.1rem; font-weight: bold; border: none; margin-bottom: 15px; }
-        .btn-clear { background: #95a5a6; color: white; width: 100%; padding: 10px; border-radius: 8px; text-align: center; font-size: 0.9rem; border: none; margin-top: 30px; }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 25px; border-radius: 25px; font-size: 0.95rem; font-weight: bold; display: none; z-index: 10000; text-align: center; }
-        .flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.4); display: none; z-index: 9999; pointer-events: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>サッシ工場 日報</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:root{--bg:#1a1f2e;--bg2:#242938;--bg3:#2e3547;--acc:#3b82f6;--acc-d:#2563eb;--grn:#22c55e;--grn-d:#16a34a;--steel:#0f172a;--r:12px;--txt:#f1f5f9;--txt2:#94a3b8;--border:#3e4a63}
+html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--txt);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-user-select:none;user-select:none;font-size:16px;touch-action:manipulation}
+#app{max-width:480px;margin:0 auto}
+.hdr{background:var(--steel);padding:14px;text-align:center;font-weight:700;font-size:1.1rem;border-bottom:1px solid var(--border)}
+.hdr-time{font-size:.8rem;color:var(--txt2);margin-top:2px;font-variant-numeric:tabular-nums}
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border)}
+.tab{flex:1;text-align:center;padding:14px 0;font-size:.95rem;color:var(--txt2);font-weight:700;cursor:pointer;border-bottom:3px solid transparent}
+.tab.active{color:var(--acc);border-bottom-color:var(--acc);background:var(--bg3)}
+.pane{display:none;padding:14px}
+.pane.active{display:block}
+.auto-banner{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);border-radius:var(--r);padding:10px 14px;font-size:.9rem;font-weight:600;color:#93c5fd;margin-bottom:10px;display:none;align-items:center;gap:8px}
+.auto-banner.show{display:flex}
+.sec-title{font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:700;margin-top:16px;letter-spacing:.08em;text-transform:uppercase}
+.quick-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:4px}
+.btn-quick{background:var(--grn);color:#fff;padding:18px 8px;border-radius:var(--r);text-align:center;font-size:1rem;font-weight:700;border:none;cursor:pointer}
+.btn-quick:active{background:var(--grn-d)}
+.btn-auto{padding:14px 6px;border-radius:var(--r);font-size:.9rem;font-weight:700;border:none;cursor:pointer;text-align:center;line-height:1.5}
+.btn-auto:active{opacity:.8}
+.btn-morning{background:#d97706;color:#fff}
+.btn-break{background:#7c3aed;color:#fff}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pbtn{background:var(--bg3);border:2px solid var(--border);padding:16px 4px;text-align:center;border-radius:var(--r);font-size:1rem;font-weight:700;color:var(--txt);cursor:pointer}
+.pbtn:active{opacity:.8}
+.pbtn.sel{background:var(--acc);color:#fff;border-color:var(--acc-d)}
+.pbtn.sel.oth{background:#475569;border-color:#334155}
+.num-disp{background:var(--steel);border:2px solid var(--border);border-radius:var(--r);padding:14px;font-size:2.4rem;text-align:right;font-weight:700;min-height:66px;color:var(--txt2);margin-bottom:10px}
+.num-disp.has-val{border-color:var(--acc);color:#f59e0b}
+.keypad-wrap{display:flex;gap:8px}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:3}
+.kbtn{background:var(--bg3);border:1px solid var(--border);padding:18px 5px;text-align:center;border-radius:10px;font-size:1.3rem;font-weight:700;color:var(--txt);cursor:pointer}
+.kbtn:active{background:var(--acc);color:#fff}
+.kbtn.clr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
+.kbtn.clr:active{background:#ef4444}
+.side-btns{display:flex;flex-direction:column;gap:8px;flex:1.2}
+.btn-bs{background:#92400e;color:#fde68a;border:none;border-radius:10px;font-size:1.2rem;font-weight:700;flex:1;cursor:pointer}
+.btn-bs:active{background:#f59e0b;color:#000}
+.btn-send{background:var(--acc);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;flex:3;cursor:pointer;line-height:1.5}
+.btn-send:active{background:var(--acc-d)}
+.dt-card{background:var(--bg2);border-radius:var(--r);padding:12px;border:1px solid var(--border);margin-top:4px}
+.dt-val{text-align:center;font-size:.9rem;font-weight:700;color:var(--acc);margin-bottom:10px;padding:6px;border-radius:8px;background:rgba(59,130,246,.1)}
+.adj-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:stretch}
+.adj-big{padding:14px 4px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%}
+.adj-big:active{opacity:.7}
+.adj-big.m{border-color:#1e40af;color:#93c5fd}
+.adj-big.p{border-color:#991b1b;color:#fca5a5}
+.adj-sub-wrap{display:flex;flex-direction:column;gap:8px}
+.adj-sub{padding:11px 4px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-size:.9rem;font-weight:700}
+.adj-sub:active{opacity:.7}
+.adj-sub.m{border-color:#1e40af;color:#93c5fd}
+.adj-sub.p{border-color:#991b1b;color:#fca5a5}
+.adj-lbl{font-size:.65rem;color:var(--txt2);font-weight:400}
+.summary-card{background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff;padding:16px;border-radius:var(--r);margin-bottom:14px;text-align:center;border:1px solid #2563eb}
+.summary-num{font-size:2rem;font-weight:700;color:#93c5fd}
+.btn-copy{background:var(--bg3);color:var(--txt);width:100%;padding:16px;border-radius:var(--r);text-align:center;font-size:1rem;font-weight:700;border:1px solid var(--border);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-copy:active{background:var(--acc);color:#fff}
+.btn-copy.done{background:var(--grn);color:#fff}
+.tl-item{background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.tl-time{font-size:.8rem;color:var(--txt2);font-weight:700;margin-bottom:3px}
+.tl-proc{font-size:1rem;font-weight:700;color:var(--txt)}
+.tl-memo{font-size:.8rem;color:var(--txt2);margin-top:2px}
+.tl-qty{font-size:1.3rem;font-weight:700;color:#f59e0b;flex-shrink:0;margin-left:10px}
+.tl-del{background:#7f1d1d;color:#fca5a5;border:none;padding:8px 12px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;margin-left:8px;flex-shrink:0}
+.tl-del:active{background:#ef4444;color:#fff}
+.empty{font-size:.9rem;color:var(--txt2);text-align:center;padding:40px 0}
+.flash{position:fixed;inset:0;background:rgba(34,197,94,.3);pointer-events:none;opacity:0;transition:opacity .25s;z-index:999}
+.flash.show{opacity:1}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(15,23,42,.95);color:#fff;padding:12px 24px;border-radius:30px;font-size:.95rem;font-weight:700;transition:transform .3s;z-index:1000;white-space:nowrap;border:1px solid var(--border)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
 </head>
 <body>
+<div id="app">
+  <div class="hdr">
+    サッシ工場 日報 v7.1
+    <div class="hdr-time" id="hTime">--:--:--</div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="sw('input',this)">入力</div>
+    <div class="tab" onclick="sw('history',this)">今日の記録</div>
+  </div>
 
-    <div class="header">サッシ工場日報アプリ v6.0</div>
+  <div id="pane-input" class="pane active">
+    <div class="auto-banner" id="autoBanner"></div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('inputTab', this)">入力</div>
-        <div class="tab" onclick="switchTab('historyTab', this)">今日の記録</div>
+    <div class="sec-title">ワンタップ自動セット</div>
+    <div class="quick-row">
+      <button class="btn-quick" onclick="quickSend()">クイック完了</button>
+      <button class="btn-auto btn-morning" onclick="autoSend('朝礼')">朝礼</button>
+      <button class="btn-auto btn-break" onclick="autoSend('休憩')">休憩</button>
     </div>
 
-    <div id="flash" class="flash-overlay"></div>
-    <div id="toast" class="toast"></div>
-
-    <div id="inputTab" class="tab-content active">
-        <button class="btn-quick" onclick="sendQuick()">⚡ クイック完了 (Z)</button>
-
-        <div class="section-title">工程を選択</div>
-        <div class="grid-process">
-            <button class="btn-proc" id="p-A" onclick="selectProcess('A', '切断')">切断(A)</button>
-            <button class="btn-proc" id="p-B" onclick="selectProcess('B', '手加工')">手加工(B)</button>
-            <button class="btn-proc" id="p-C" onclick="selectProcess('C', 'NC加工')">NC加工(C)</button>
-            <button class="btn-proc" id="p-D" onclick="selectProcess('D', '組立')">組立(D)</button>
-            <button class="btn-proc" id="p-Z" onclick="selectProcess('Z', 'その他')">その他(Z)</button>
-        </div>
-
-        <div class="section-title">現場名・備考（空欄でもOK / 声で入力も可能）</div>
-        <input type="text" class="input-memo" id="memoInput" placeholder="例: すき家、せき内科など">
-
-        <div class="section-title">数量を入力</div>
-        <div class="num-display" id="numDisplay"></div>
-        
-        <div class="keypad-container">
-            <div class="grid-keypad">
-                <button class="btn-key" onclick="pressKey('1')">1</button>
-                <button class="btn-key" onclick="pressKey('2')">2</button>
-                <button class="btn-key" onclick="pressKey('3')">3</button>
-                <button class="btn-key" onclick="pressKey('4')">4</button>
-                <button class="btn-key" onclick="pressKey('5')">5</button>
-                <button class="btn-key" onclick="pressKey('6')">6</button>
-                <button class="btn-key" onclick="pressKey('7')">7</button>
-                <button class="btn-key" onclick="pressKey('8')">8</button>
-                <button class="btn-key" onclick="pressKey('9')">9</button>
-                <button class="btn-key" onclick="pressKey('C')" style="background:#e74c3c; color:white;">C</button>
-                <button class="btn-key" onclick="pressKey('0')">0</button>
-            </div>
-            <div class="side-action-container">
-                <button class="btn-bs" onclick="pressKey('BS')">⌫ 戻る</button>
-                <button class="btn-direct-send" onclick="submitData()">送信<br>確定</button>
-            </div>
-        </div>
-
-        <div class="section-title">時間調整 (必要な場合のみ)</div>
-        <div class="grid-time">
-            <button class="btn-time-big" onclick="adjustTime(-60)">－1h</button>
-            <div class="time-center-stack">
-                <button class="btn-time-sub" onclick="adjustTime(-10)">－10分</button>
-                <button class="btn-time-sub" onclick="adjustTime(10)">＋10分</button>
-            </div>
-            <button class="btn-time-big" onclick="adjustTime(60)">＋1h</button>
-        </div>
-        <div class="time-display-box" id="timeDisplay" onclick="resetTimeToPresent()">設定時刻: 表示中...</div>
-
-        <div class="section-title" style="margin-top:20px;">直近の履歴</div>
-        <div id="recentHistory"></div>
+    <div class="sec-title">工程を選択</div>
+    <div class="pgrid">
+      <button class="pbtn" onclick="selProc('切断',this)">切断</button>
+      <button class="pbtn" onclick="selProc('手加工',this)">手加工</button>
+      <button class="pbtn" onclick="selProc('NC加工',this)">NC加工</button>
+      <button class="pbtn" onclick="selProc('組立',this)">組立</button>
+      <button class="pbtn oth-p" onclick="selProc('その他',this)" style="grid-column:span 2">その他</button>
     </div>
 
-    <div id="historyTab" class="tab-content">
-        <div class="summary-card">
-            <div>本日の製作 累計数量</div>
-            <div class="summary-num" id="totalQtyDisplay">0 個</div>
-        </div>
-        <button class="btn-copy" onclick="copyToClipboard()">📋 1発でドカンとExcel用にコピー</button>
-        <div id="fullTimeline"></div>
-        <button class="btn-clear" onclick="clearAllData()">⚠️ アプリ内のデータをリセット</button>
+    <div class="sec-title">数量を入力</div>
+    <div class="num-disp" id="numDisp"> </div>
+    <div class="keypad-wrap">
+      <div class="kgrid">
+        <button class="kbtn" onclick="kp('7')">7</button>
+        <button class="kbtn" onclick="kp('8')">8</button>
+        <button class="kbtn" onclick="kp('9')">9</button>
+        <button class="kbtn" onclick="kp('4')">4</button>
+        <button class="kbtn" onclick="kp('5')">5</button>
+        <button class="kbtn" onclick="kp('6')">6</button>
+        <button class="kbtn" onclick="kp('1')">1</button>
+        <button class="kbtn" onclick="kp('2')">2</button>
+        <button class="kbtn" onclick="kp('3')">3</button>
+        <button class="kbtn clr" onclick="kp('C')">C</button>
+        <button class="kbtn" onclick="kp('0')">0</button>
+      </div>
+      <div class="side-btns">
+        <button class="btn-bs" onclick="kp('BS')">戻る</button>
+        <button class="btn-send" onclick="doSend()">送信<br>確定</button>
+      </div>
     </div>
 
-    <script>
-        let selectedCode = ''; let selectedLabel = ''; let currentQty = ''; let timeOffsetMinutes = 0;
-        let records = JSON.parse(localStorage.getItem('nippo_records_v6') || '[]');
+    <div class="sec-title">時間調整</div>
+    <div class="dt-card">
+      <div class="dt-val" id="dtVal" onclick="resetDt()">設定時刻: -- (タップでリセット)</div>
+      <div class="adj-wrap">
+        <button class="adj-big m" onclick="adj(-60)">
+          <span style="font-size:1.3rem;font-weight:700">-1h</span>
+          <span class="adj-lbl">1時間前</span>
+        </button>
+        <div class="adj-sub-wrap">
+          <button class="adj-sub m" onclick="adj(-10)">-10分</button>
+          <button class="adj-sub p" onclick="adj(10)">+10分</button>
+        </div>
+        <button class="adj-big p" onclick="adj(60)">
+          <span style="font-size:1.3rem;font-weight:700">+1h</span>
+          <span class="adj-lbl">1時間後</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-        window.onload = function() {
-            updateTimeDisplay();
-            setInterval(updateTimeDisplay, 10000);
-            checkAutoSet();
-            renderRecords();
-        };
+  <div id="pane-history" class="pane">
+    <div class="summary-card">
+      <div style="font-size:.85rem;margin-bottom:4px;color:#bfdbfe">本日の製作 累計数量</div>
+      <div class="summary-num" id="totalQty">0 個</div>
+    </div>
+    <button class="btn-copy" id="copyBtn" onclick="copyExcel()">
+      Excel用にコピー (パソコンでCtrl+V)
+    </button>
+    <div id="timeline"></div>
+  </div>
+</div>
 
-        function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active'); el.classList.add('active');
-            renderRecords();
-        }
+<div class="flash" id="fl"></div>
+<div class="toast" id="toast"></div>
 
-        function getTargetDate() {
-            let d = new Date(); d.setMinutes(d.getMinutes() + timeOffsetMinutes); return d;
-        }
+<script>
+var proc='',numStr='',adjMs=0,records=[];
+try{records=JSON.parse(localStorage.getItem('nippo_v71')||'[]');}catch(e){}
 
-        function updateTimeDisplay() {
-            let d = getTargetDate();
-            document.getElementById('timeDisplay').innerText = `設定時刻: ${d.toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'})} ⏳ (タップで今すぐリセット)`;
-        }
+function todayStr(){var n=new Date();return n.getFullYear()+'/'+(n.getMonth()+1<10?'0':'')+(n.getMonth()+1)+'/'+(n.getDate()<10?'0':'')+n.getDate();}
+function getTs(){return new Date(Date.now()+adjMs);}
+function fmtDt(d){var dt=d instanceof Date?d:new Date(d);return dt.getFullYear()+'/'+(dt.getMonth()+1<10?'0':'')+(dt.getMonth()+1)+'/'+(dt.getDate()<10?'0':'')+dt.getDate()+' '+(dt.getHours()<10?'0':'')+dt.getHours()+':'+(dt.getMinutes()<10?'0':'')+dt.getMinutes();}
+function fmtTime(d){var dt=d instanceof Date?d:new Date(d);return(dt.getHours()<10?'0':'')+dt.getHours()+':'+(dt.getMinutes()<10?'0':'')+dt.getMinutes();}
+function updDt(){document.getElementById('dtVal').textContent='設定時刻: '+fmtTime(getTs())+'  (タップでリセット)';}
+function adj(min){adjMs+=min*60000;updDt();showToast(min>0?'+'+min+'分':min+'分');}
+function resetDt(){adjMs=0;updDt();showToast('現在時刻にリセット');}
 
-        function adjustTime(mins) { timeOffsetMinutes += mins; updateTimeDisplay(); }
-        function resetTimeToPresent() { timeOffsetMinutes = 0; updateTimeDisplay(); showToast("現在時刻に戻しました"); }
+function checkAutoSet(){
+  var n=new Date();var h=n.getHours();var m=n.getMinutes();
+  var today=todayStr();var key='autoset_'+today;
+  var done=localStorage.getItem(key)||'';
+  if(h===8&&m>=30&&m<=40&&done.indexOf('朝礼')<0){
+    document.getElementById('autoBanner').textContent='朝礼を自動セットしました';
+    document.getElementById('autoBanner').classList.add('show');
+    autoSend('朝礼');localStorage.setItem(key,done+'朝礼');
+  } else if(h===12&&m>=0&&m<=10&&done.indexOf('休憩')<0){
+    document.getElementById('autoBanner').textContent='12:00 休憩を自動セットしました';
+    document.getElementById('autoBanner').classList.add('show');
+    autoSend('休憩');localStorage.setItem(key,done+'休憩');
+  }
+}
 
-        function checkAutoSet() {
-            let now = new Date(); let hr = now.getHours(); let min = now.getMinutes(); let totalMin = hr * 60 + min;
-            if (totalMin >= 510 && totalMin <= 520) {
-                selectProcess('W', '朝礼'); currentQty = '0'; document.getElementById('numDisplay').innerText = currentQty; document.getElementById('memoInput').value = '朝礼';
-            } else if (hr == 12) {
-                selectProcess('Z', 'その他'); currentQty = '0'; document.getElementById('numDisplay').innerText = currentQty; document.getElementById('memoInput').value = '休憩';
-            }
-        }
+function sw(name,btn){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active');});
+  btn.classList.add('active');document.getElementById('pane-'+name).classList.add('active');
+  if(name==='history')renderTimeline();
+}
+function selProc(p,btn){
+  proc=p;document.querySelectorAll('.pbtn').forEach(function(b){b.classList.remove('sel','oth');});
+  btn.classList.add('sel');if(p==='その他')btn.classList.add('oth');
+}
+function kp(k){
+  if(k==='C')numStr='';
+  else if(k==='BS')numStr=numStr.slice(0,-1);
+  else{if(numStr==='0')numStr='';numStr+=k;}
+  var el=document.getElementById('numDisp');
+  el.textContent=numStr||' ';el.classList.toggle('has-val',numStr.length>0);
+}
+function mkRec(p,qty,memo){var ts=getTs();return{id:Date.now()+Math.random(),ts:ts.getTime(),datetime:fmtDt(ts),process:p,qty:qty,memo:memo||''};}
+function addRec(r){records.unshift(r);try{localStorage.setItem('nippo_v71',JSON.stringify(records.slice(-200)));}catch(e){}flash();}
+function doSend(){if(!proc){showToast('工程を選んでください');return;}var qty=parseInt(numStr)||0;addRec(mkRec(proc,qty,''));showToast(proc+' / '+qty+'個');resetForm();}
+function quickSend(){addRec(mkRec('その他',0,'クイック完了'));showToast('クイック完了');}
+function autoSend(t){addRec(mkRec('その他',0,t));showToast(t+'を記録しました');}
+function resetForm(){proc='';numStr='';adjMs=0;document.querySelectorAll('.pbtn').forEach(function(b){b.classList.remove('sel','oth');});document.getElementById('numDisp').textContent=' ';document.getElementById('numDisp').classList.remove('has-val');updDt();}
 
-        function selectProcess(code, label) {
-            selectedCode = code; selectedLabel = label;
-            document.querySelectorAll('.btn-proc').forEach(b => b.classList.remove('active'));
-            let btn = document.getElementById(`p-${code}`); if(btn) btn.classList.add('active');
-            
-            // 自動セット時間外に普通にボタンが押されたら文字をクリアする
-            let hr = new Date().getHours();
-            if(hr != 12 && !(new Date().getHours() == 8 && new Date().getMinutes() <= 40)) {
-                if(code !== 'W' && code !== 'Z') { document.getElementById('memoInput').value = ''; }
-            }
-        }
+function renderTimeline(){
+  var today=todayStr();
+  var recs=records.filter(function(r){return r.datetime.indexOf(today)===0;}).slice().reverse();
+  var total=0;recs.forEach(function(r){if(['切断','手加工','NC加工','組立'].indexOf(r.process)>=0)total+=r.qty;});
+  document.getElementById('totalQty').textContent=total+' 個';
+  var el=document.getElementById('timeline');
+  if(!recs.length){el.innerHTML='<div class="empty">今日の記録はまだありません</div>';return;}
+  el.innerHTML=recs.map(function(r){
+    return '<div class="tl-item"><div style="flex:1;min-width:0"><div class="tl-time">'+r.datetime.split(' ')[1]+'</div><div class="tl-proc">'+r.process+'</div>'+(r.memo?'<div class="tl-memo">'+r.memo+'</div>':'')+'</div><div style="display:flex;align-items:center"><span class="tl-qty">'+(r.qty>0?r.qty+'個':'-')+'</span><button class="tl-del" onclick="delRec('+r.id+')">削除</button></div></div>';
+  }).join('');
+}
+function delRec(id){records=records.filter(function(r){return r.id!==id;});try{localStorage.setItem('nippo_v71',JSON.stringify(records));}catch(e){}renderTimeline();showToast('削除しました');}
 
-        function pressKey(key) {
-            if (key === 'C') { currentQty = ''; }
-            else if (key === 'BS') { currentQty = currentQty.slice(0, -1); }
-            else { if(currentQty === '0') currentQty = ''; currentQty += key; }
-            document.getElementById('numDisplay').innerText = currentQty;
-        }
+function copyExcel(){
+  var today=todayStr();
+  var recs=records.filter(function(r){return r.datetime.indexOf(today)===0;}).slice().reverse();
+  if(!recs.length){showToast('今日の記録がありません');return;}
+  var text='日付/時刻\t作業者\t工程\t数量\t備考\n'+recs.map(function(r){return r.datetime+'\t自分\t'+r.process+'\t'+r.qty+'\t'+(r.memo||'');}).join('\n');
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=document.getElementById('copyBtn');btn.classList.add('done');btn.textContent='コピー完了！ パソコンでCtrl+V';
+    showToast(recs.length+'件をコピーしました');
+    setTimeout(function(){btn.classList.remove('done');btn.textContent='Excel用にコピー (パソコンでCtrl+V)';},3000);
+  }).catch(function(){showToast('コピー失敗。ブラウザの許可を確認');});
+}
 
-        function sendQuick() {
-            let d = getTargetDate();
-            let newRecord = { id: Date.now(), time: d.toLocaleString('ja-JP'), code: 'Z', label: 'その他', qty: 0, memo: 'クイック完了' };
-            records.unshift(newRecord); saveAndFeedback("クイック完了を保存");
-        }
-
-        function submitData() {
-            if(!selectedCode) { alert("工程を選択してください！"); return; }
-            let qtyNum = parseInt(currentQty) || 0;
-            let d = getTargetDate();
-
-            let newRecord = {
-                id: Date.now(),
-                time: d.toLocaleString('ja-JP'),
-                code: selectedCode,
-                label: selectedLabel,
-                qty: qtyNum,
-                memo: document.getElementById('memoInput').value || ''
-            };
-
-            records.unshift(newRecord);
-            saveAndFeedback(`スマホに保存しました [${qtyNum}個]`);
-            
-            currentQty = ''; document.getElementById('numDisplay').innerText = '';
-            document.getElementById('memoInput').value = '';
-            document.querySelectorAll('.btn-proc').forEach(b => b.classList.remove('active'));
-            selectedCode = ''; timeOffsetMinutes = 0; updateTimeDisplay();
-        }
-
-        function saveAndFeedback(msg) {
-            localStorage.setItem('nippo_records_v6', JSON.stringify(records));
-            renderRecords();
-            let flash = document.getElementById('flash'); flash.style.display = 'block'; setTimeout(() => flash.style.display = 'none', 150);
-            showToast(msg);
-        }
-
-        function showToast(msg) {
-            let toast = document.getElementById('toast'); toast.innerText = msg; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000);
-        }
-
-        function editQty(id, oldQty) {
-            let newQty = prompt("修正後の数量を入力してください:", oldQty);
-            if(newQty !== null) {
-                let num = parseInt(newQty) || 0;
-                records = records.map(r => r.id === id ? {...r, qty: num} : r);
-                localStorage.setItem('nippo_records_v6', JSON.stringify(records));
-                renderRecords(); showToast("数量を修正しました");
-            }
-        }
-
-        function deleteRecord(id) {
-            if(confirm("削除しますか？")) {
-                records = records.filter(r => r.id !== id);
-                localStorage.setItem('nippo_records_v6', JSON.stringify(records));
-                renderRecords(); showToast("削除しました");
-            }
-        }
-
-        function clearAllData() {
-            if(confirm("データをすべて消去しますか？\n(Excelに貼った後のリセット用)")) {
-                records = []; localStorage.setItem('nippo_records_v6', JSON.stringify(records));
-                renderRecords(); showToast("リセットしました");
-            }
-        }
-
-        function renderRecords() {
-            let totalQty = 0;
-            let recentDiv = document.getElementById('recentHistory'); recentDiv.innerHTML = '';
-            
-            records.slice(0, 3).forEach(r => {
-                let t = r.time.split(' ')[1] || r.time;
-                recentDiv.innerHTML += `
-                    <div class="timeline-item">
-                        <div class="tl-left">
-                            <span class="tl-time">${t}</span>
-                            <span class="tl-title">${r.label} (${r.code}) ${r.memo ? `<span class="tl-site">[${r.memo}]</span>` : ''}</span>
-                        </div>
-                        <div class="tl-right"><span class="tl-qty-click" onclick="editQty(${r.id}, ${r.qty})">${r.qty}個</span></div>
-                    </div>`;
-            });
-
-            let fullDiv = document.getElementById('fullTimeline'); fullDiv.innerHTML = '';
-            if(records.length === 0) {
-                fullDiv.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">記録はまだありません</p>';
-                document.getElementById('totalQtyDisplay').innerText = "0 個"; return;
-            }
-
-            records.forEach(r => {
-                if(['A','B','C','D'].includes(r.code)) { totalQty += r.qty; }
-                fullDiv.innerHTML += `
-                    <div class="timeline-item">
-                        <div class="tl-left">
-                            <span class="tl-time">${r.time}</span>
-                            <span class="tl-title">${r.label} (${r.code})</span><br><span class="tl-site">メモ: ${r.memo || 'なし'}</span>
-                        </div>
-                        <div class="tl-right">
-                            <span class="tl-qty-click" onclick="editQty(${r.id}, ${r.qty})">${r.qty}個</span>
-                            <button class="btn-del" onclick="deleteRecord(${r.id})">削除</button>
-                        </div>
-                    </div>`;
-            });
-            document.getElementById('totalQtyDisplay').innerText = totalQty + " 個";
-        }
-
-        // 🌟コピペデータ作成：数量の右隣（5列目）に自動で「1」を潜り込ませる魔法の関数
-        function copyToClipboard() {
-            if(records.length === 0) { alert("コピーするデータがありません"); return; }
-            let text = "";
-            let copyList = [...records].reverse(); // 古い順に並び替え
-            
-            copyList.forEach(r => {
-                let dStr = r.time.split(' ')[0];
-                let tStr = r.time.split(' ')[1] ? r.time.split(' ')[1].slice(0,5) : "";
-                
-                // ➔ 【日時】タブ【自分】タブ【工程記号】タブ【数量】タブ【 1 】タブ【メモ】 の順で1行を作る
-                text += `${dStr} ${tStr}\t自分\t${r.code}\t${r.qty}\t1\t${r.memo}\n`;
-            });
-
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("📋 Excel用に1発コピーしました！シートの左上セルでCtrl+Vしてください");
-            }).catch(err => { alert("コピー失敗"); });
-        }
-    </script>
+function flash(){var e=document.getElementById('fl');e.classList.add('show');setTimeout(function(){e.classList.remove('show');},300);}
+function showToast(msg){var e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(function(){e.classList.remove('show');},2200);}
+setInterval(function(){
+  var n=new Date();
+  document.getElementById('hTime').textContent=(n.getHours()<10?'0':'')+n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()+':'+(n.getSeconds()<10?'0':'')+n.getSeconds();
+  updDt();
+},1000);
+updDt();checkAutoSet();
+</script>
 </body>
 </html>
